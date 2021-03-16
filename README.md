@@ -1,1 +1,3 @@
-# DAN-Intro-To-Business-Analysis Aaron Lang
+# DAN-Intro-To-Business-Analysis
+Nhan Tran
+Aaron Lang

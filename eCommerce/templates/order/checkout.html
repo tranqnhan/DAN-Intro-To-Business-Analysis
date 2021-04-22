@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="m-3">
+    <h3 class="mb-4">Checkout</h3>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-danger" role="alert">
+        Purchasing error. {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <div class="d-flex flex-row justify-content-between">
+        <div style="flex: 1;">Name</div>
+        <div style="flex: 1;">Quantity</div>
+        <div style="flex: 1;">Total Cost</div>
+    </div>
+    <hr />
+    <div>
+        {% for item in items %}
+        <div class="mb-2 mt-2 d-flex flex-row justify-content-between">
+            <div style="flex: 1;">{{item["name"]}}</div>
+            <div style="flex: 1;">{{item["qty"]}}</div>
+            <div style="flex: 1;">${{"{:,.2f}".format(item["total"])}}</div>
+        </div>
+        {% endfor %}
+    </div>
+    <hr />
+    <div class="d-flex flex-row justify-content-between">
+        <div style="flex: 1;">Final Total</div>
+        <div style="flex: 1;"></div>
+        <div style="flex: 1;">${{"{:,.2f}".format(grandtotalcost)}}</div>
+    </div>
+    <hr />
+    <form action="{{ url_for('buying.confirm_buy', checkoutlist=items) }}" method="POST">
+        <div class="form-group">
+            <label for="address">Shipping Address</label>
+            <input type="text" maxlength=150 name="address" class="form-control" id="address" value="{{current_user.address}}" required>
+        </div>
+        <button type="submit" class="btn btn-primary mb-4">Confirm Buy</button>
+    </form>
+</div>
+{% endblock %}

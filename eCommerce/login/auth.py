@@ -41,8 +41,9 @@ def signup_post():
     password = request.form.get('password')
     firstname = request.form.get('firstname')
     lastname = request.form.get('lastname')
+    address = request.form.get('address')
 
-    new_user = User(username=username, firstname=firstname, lastname=lastname, credits=125.55, password=generate_password_hash(password, method='sha256'))
+    new_user = User(username=username, address=address, firstname=firstname, lastname=lastname, credits=125.55, password=generate_password_hash(password, method='sha256'))
     db.session.add(new_user)
     db.session.commit()
 

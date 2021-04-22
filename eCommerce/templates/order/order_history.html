@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="m-3">
+    <h3 class="mb-4">Order#{{ order_id }}</h3>
+    <div class="d-flex flex-row justify-content-between">
+        <div style="flex: 1;">Name</div>
+        <div style="flex: 1;">Quantity</div>
+        <div style="flex: 1;">Total Cost</div>
+    </div>
+    <hr />
+    <div>
+        {% for item in orderitems %}
+        <div class="mb-2 mt-2 d-flex flex-row justify-content-between">
+            <div style="flex: 1;">{{item[0]}}</div>
+            <div style="flex: 1;">{{item[1]}}</div>
+            <div style="flex: 1;">${{"{:,.2f}".format(item[2])}}</div>
+        </div>
+        {% endfor %}
+    </div>
+    <hr />
+    <div class="d-flex flex-row justify-content-between">
+        <div style="flex: 1;">Final Total</div>
+        <div style="flex: 1;"></div>
+        <div style="flex: 1;">${{"{:,.2f}".format(grandtotalcost)}}</div>
+    </div>
+    <hr />
+    <div>Shipping Address: {{address}}</div>
+</div>
+{% endblock %}

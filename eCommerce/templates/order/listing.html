@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid w-50 mt-5">
+    <h3> Create Listing </h3>
+    <form class="needs-validation" action="/create-listing" method="POST">
+        <div class="form-group">
+            <label for="itemname">Name of Item</label>
+            <input minlength=1 maxlength=100 name="itemname" type="text" class="form-control" id="itemname" placeholder="Item name" required>
+        </div>
+        <div class="form-group">
+            <label for="price">Price (in dollars)</label>
+            <input name="price" type="number" min=0.01 step=0.01 class="form-control" id="price" placeholder="$0.00 USD" required>
+        </div>
+        <div class="form-group">
+            <label for="qty">Amount</label>
+            <input name="qty" type="number" min=0 class="form-control" id="qty" placeholder="0" required>
+        </div>
+        <div class="form-group">
+            <label for="imageurl">Image URL</label>
+            <input maxlength=1000 name="imageurl" type="url" class="form-control" id="imageurl" placeholder="URL">
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea class="form-control" maxlength=5000 id="description" name="description" rows="5"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block mb-4">Submit</button>
+    </form>
+</div>
+{% endblock %}

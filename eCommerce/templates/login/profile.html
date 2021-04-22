@@ -1,8 +1,62 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid">
-    <h3> Welcome, {{ firstname }} {{ lastname }}.</h3>
-    <p>Your current balance: ${{ credits }}</p>
+<div class="m-3">
+    <h3> Welcome, {{ firstname }} {{ lastname }}</h3>
+    <p>Your current balance: ${{ "{:,.2f}".format(credits) }}</p>
+
+    <div class="card-header" id="orderhisheading">
+        <h5 class="mb-0">
+            <button class="btn btn-link" data-toggle="collapse" data-target="#orderhiscollapse" aria-expanded="true"
+                aria-controls="orderhiscollapse">
+                Order History
+            </button>
+        </h5>
+    </div>
+    
+    <div id="orderhiscollapse" class="collapse show" aria-labelledby="orderhisheading" data-parent="#accordion">
+        {% if orderhistory|length > 0 %}
+        <div class="list-group">
+            {% for order in orderhistory %}
+            <a href="{{ url_for('user_profile.view_order_history', order_id=order[0]) }}"
+                class="list-group-item list-group-item-action d-flex flex-row justify-content-between">
+                <div class="p-2" style="flex: 1;">Order#{{ order[0] }}</div>
+                <div class="p-2" style="flex: 1;">Order Total: ${{ "{:,.2f}".format(order[1]) }}</div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card-body">
+            You have not buy anything yet. <a href="{{ url_for('selling.listing') }}">Browse items here.</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card-header" id="inventoryheading">
+        <h5 class="mb-0">
+            <button class="btn btn-link" data-toggle="collapse" data-target="#inventorycollapse" aria-expanded="true"
+                aria-controls="inventorycollapse">
+                    Inventory
+            </button>
+        </h5>
+    </div>
+    
+    <div id="inventorycollapse" class="collapse show" aria-labelledby="inventoryheading" data-parent="#accordion">
+        {% if inventory|length > 0 %}
+        <div class="list-group">
+            {% for sale in inventory %}
+            <a href="{{ url_for('selling.view_item', item_id=sale[0]) }}" class="list-group-item list-group-item-action d-flex flex-row justify-content-between">
+                <div class="p-2" style="flex: 1;">Name: {{ sale[1] }}</div>
+                <div class="p-2" style="flex: 1;">In stock: {{ sale[2] }}</div>
+                <div class="p-2" style="flex: 1;">Revenue: ${{ "{:,.2f}".format(sale[3]) }}</div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card-body">
+            You have not create any listing yet. <a href="{{ url_for('selling.listing') }}">Create a listing here.</a> 
+        </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

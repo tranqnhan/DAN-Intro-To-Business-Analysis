@@ -30,4 +30,10 @@ def create_app():
     from login.profile import user_profile as profile_blueprint
     app.register_blueprint(profile_blueprint)
 
+    from order.selling import selling as selling_blueprint
+    app.register_blueprint(selling_blueprint)
+
+    from order.buying import buying as buying_blueprint
+    app.register_blueprint(buying_blueprint)
+
     return app

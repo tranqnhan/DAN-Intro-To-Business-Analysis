@@ -38,4 +38,5 @@ def create_app():
 
     from home.home import home as home_blueprint
     app.register_blueprint(home_blueprint)
+
     return app

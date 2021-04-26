@@ -36,4 +36,7 @@ def create_app():
     from order.buying import buying as buying_blueprint
     app.register_blueprint(buying_blueprint)
 
+    from home.home import home as home_blueprint
+    app.register_blueprint(home_blueprint)
+
     return app

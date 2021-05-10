@@ -55,7 +55,7 @@ def view_order_history(order_id):
     for orderitem in orderitems:
         grandtotalcost += orderitem.cost
         orderitemlist.append([orderitem.name, orderitem.qty_ordered, orderitem.cost])
-    
+
     return render_template('order/order_history.html', order_id=order.id, address=order.shipaddress, grandtotalcost=grandtotalcost, orderitems=orderitemlist)
 
 

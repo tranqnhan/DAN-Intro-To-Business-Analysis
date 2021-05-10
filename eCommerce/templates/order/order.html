@@ -40,13 +40,11 @@
     const addToCartBtn = document.getElementById("add-to-cart");
 
     addToCartBtn.addEventListener("click", () => {
-        console.log("LMAOOOOO")
         form.action = "{{ url_for('buying.add_to_cart', item_id=item_id) }}";
     })
 
 
     buyNowBtn.addEventListener("click", () => {
-        console.log("LMAOOOOOsdasd")
         form.action = "{{ url_for('buying.buy_now', item_id=item_id) }}";
     })
 </script>

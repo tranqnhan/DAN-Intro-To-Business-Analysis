@@ -5,10 +5,6 @@ from models import Item, OrderItem, Order
 
 user_profile = Blueprint('user_profile', __name__)
 
-@user_profile.route('/')
-def index():
-    return render_template('index.html')
-
 @user_profile.route('/profile')
 @login_required
 def profile():

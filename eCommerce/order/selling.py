@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import current_user, login_required
 from app import db
-from models import Item
+from models import Item, Discount
 
 selling = Blueprint('selling', __name__)
 
@@ -21,22 +21,47 @@ def listing_post():
 
     item = Item(itemname=itemname, merchant_id=current_user.id, price=price, imageurl=imageurl, description=description, qty=qty)
     db.session.add(item)    
-    db.session.commit()
-    
+    db.session.flush()
+
+    discount_code = request.form.get('discount-code')
+    if discount_code:
+        discount_amount = request.form.get('discount-amount')
+        discount = Discount(discount_code = discount_code, discount_amount = discount_amount, item_id = item.id)
+        db.session.add(discount)    
+        db.session.commit()
+
     return redirect(url_for('user_profile.profile'))
 
 @selling.route('/inventory/item/<item_id>')
 @login_required
 def view_item(item_id):
     item = Item.query.filter_by(id=item_id).first()
-
+    
     if (current_user.id == item.merchant_id):
+        discount = Discount.query.filter_by(item_id=item_id).first()
+        if discount:
+            discount_code = discount.discount_code
+            discount_amount = discount.discount_amount
+                
+            return render_template('order/inventory.html',
+                itemname=item.itemname,
+                imageurl=item.imageurl,
+                description=item.description,
+                price=item.price,
+                qty=item.qty,
+                discount_code = discount_code,
+                discount_amount = discount_amount
+            )
+
+
         return render_template('order/inventory.html',
             itemname=item.itemname,
             imageurl=item.imageurl,
             description=item.description,
-            price="{:,.2f}".format(item.price),
-            qty=item.qty
+            price=item.price,
+            qty=item.qty,
+            discount_code = None,
+            discount_amount = None
         )
     else:
         return render_template('permission_error.html')
@@ -51,7 +76,7 @@ def edit_item(item_id):
             itemname=item.itemname,
             imageurl=item.imageurl,
             description=item.description,
-            price="{:,.2f}".format(item.price),
+            price=item.price,
             qty=item.qty
         )
     else:

@@ -9,12 +9,46 @@
 {% endif %}
 {% endwith %}
 {% if qty > 0 %}
-<form action="{{ url_for('buying.buy_now', item_id=item_id) }}" method="POST">
+<div id="info" class="alert alert-info" role="alert" style="display:none;"></div>
+<form id="order-form" method="POST">
     <div class="form-group">
         <label for="qty">Quantity</label>
         <input name="qty" type="number" min=1 step=1 max={{qty}} class="form-control" id="qty" value=1>
     </div>
-    <button type="submit" class="btn btn-primary btn-block mb-4">Buy Now</button>
+    <div class="form-group">
+        <label for="discount-code">Discount Code</label>
+        <input name="discount-code" type="text" maxlength=15 class="form-control" id="discount-code" placeholder="Enter discount code here">
+    </div>
+    <div id="discount-info" class="card mb-3" style="display: none;">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Discount</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Discount Amount</h6>
+            <p class="card-text" id="discount-amt"></p>
+            <h6 class="card-subtitle mb-2 text-muted">Price Per Item</h6>
+            <p class="card-text">
+                <s>$ {{"{:,.2f}".format(price)}}</s>
+                <span style="color:red" id="final-price"></span>
+            </p>
+        </div>
+    </div>
+    <button id="buy-now-btn" type="submit" class="btn btn-primary btn-block mb-4">Buy Now</button>
+    <button id="add-to-cart" type="submit" class="btn btn-primary btn-block mb-4">Add To Cart</button>
 </form>
+<script id="order-submit">
+    const form = document.getElementById("order-form");
+    const buyNowBtn = document.getElementById("buy-now-btn");
+    const addToCartBtn = document.getElementById("add-to-cart");
+
+    addToCartBtn.addEventListener("click", () => {
+        form.action = "{{ url_for('buying.add_to_cart', item_id=item_id) }}";
+    })
+
+
+    buyNowBtn.addEventListener("click", () => {
+        form.action = "{{ url_for('buying.buy_now', item_id=item_id) }}";
+    })
+</script>
+<script id="get-discount-info" src="{{url_for('static', filename='js/discount_check.js')}}" item-id={{item_id}} price={{price}}></script>
+
 {% endif %}
 {% endblock %}

@@ -22,7 +22,7 @@ class OrderItem(db.Model):
 
     qty_ordered = db.Column(db.Integer)
     name = db.Column(db.String(100))  # In case the item is deleted, this is for order history
-    cost = db.Column(db.Float)
+    cost = db.Column(db.Float) # In case it is a discounted price
 
     item = db.relationship('Item', backref=db.backref('orders'))
     order = db.relationship('Order', backref=db.backref('items'))
@@ -35,6 +35,12 @@ class Item(db.Model):
     price = db.Column(db.Float)
     qty = db.Column(db.Integer)
     imageurl = db.Column(db.String(1000))
+
+class Discount(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    discount_code = db.Column(db.String(15))
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'))
+    discount_amount = db.Column(db.Float)
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)

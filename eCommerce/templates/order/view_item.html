@@ -8,7 +8,7 @@
         </div>
         <div class="col-4">
             <h1> {{ itemname }} </h1>
-            <h4> Price: ${{ price }} </h4>
+            <h4> Price: ${{ "{:,.2f}".format(price) }} </h4>
             {% if qty <= 0 %}
                 <h5><em> Out of Stock </em></h5>
             {% else %}

@@ -40,3 +40,7 @@ def create_app():
     app.register_blueprint(home_blueprint)
 
     return app
+
+app = create_app()
+if __name__ == "__main__":
+    app.run()

@@ -5,10 +5,6 @@ from models import Item, OrderItem, Order
 
 user_profile = Blueprint('user_profile', __name__)
 
-@user_profile.route('/')
-def index():
-    return render_template('index.html')
-
 @user_profile.route('/profile')
 @login_required
 def profile():
@@ -55,7 +51,7 @@ def view_order_history(order_id):
     for orderitem in orderitems:
         grandtotalcost += orderitem.cost
         orderitemlist.append([orderitem.name, orderitem.qty_ordered, orderitem.cost])
-    
+
     return render_template('order/order_history.html', order_id=order.id, address=order.shipaddress, grandtotalcost=grandtotalcost, orderitems=orderitemlist)
 
 

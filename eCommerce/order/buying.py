@@ -1,7 +1,7 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, make_response, jsonify
 from flask_login import current_user, login_required
 from app import db
-from models import Item, Order, OrderItem, User
+from models import Item, Order, OrderItem, User, Discount, CartItem
 
 import ast
 
@@ -28,10 +28,55 @@ def checkout():
                 if (int(astdata["qty"]) > item.qty):
                     flash('Item ' + item.itemname + ' quantity ordered exceeds supply of ' + str(item.qty) + '.')
                 else:
-                    totalcost = item.price * int(astdata["qty"])
-                    items.append({"id": item.id, "name": item.itemname, "qty": int(astdata["qty"]), "total": totalcost})
+                    if (astdata["discount_code"] != ""):
+                        discount_info = Discount.query.filter_by(item_id=item.id, discount_code=astdata["discount_code"]).first()
+                        if (discount_info != None):
+                            totalcost = (item.price - discount_info.discount_amount) * int(astdata["qty"])
+                        else:
+                            flash('Discount for ' + item.itemname + ' does not exist. Either it is removed, or it never exist.')
+                            totalcost = item.price * int(astdata["qty"])
+                    else:
+                        totalcost = item.price * int(astdata["qty"])
+
+                    items.append({"id": item.id, "name": item.itemname, "qty": int(astdata["qty"]), "total": totalcost, "discount_code": astdata["discount_code"]})
                     grandtotalcost += totalcost
 
+    return render_template('order/checkout.html', items=items, grandtotalcost=grandtotalcost)
+
+@buying.route('/checkout/cart')
+@login_required
+def checkout_cart():
+    cartitems = CartItem.query.filter_by(buyer_id=current_user.id)
+
+    #Name, Qty, Total Cost, Grand Total Cost
+    items = []
+    grandtotalcost = 0
+    for cartitem in cartitems:
+        item = Item.query.filter_by(id=cartitem.item_id).first()
+        if (item == None):
+            flash('Item ' + str(cartitem.item_id) + ' does not exist. It may have been removed.')
+        else:
+            user = User.query.filter_by(id=item.merchant_id).first()
+            if (user == None):
+                flash('Supplier of this item no longer exist.')
+            else:
+                astdata = {"qty" : cartitem.qty_ordered, "discount_code": "" }
+                if (int(astdata["qty"]) > item.qty):
+                    flash('Item ' + item.itemname + ' quantity ordered exceeds supply of ' + str(item.qty) + '.')
+                else:
+                    if (astdata["discount_code"] != ""):
+                        discount_info = Discount.query.filter_by(item_id=item.id, discount_code=astdata["discount_code"]).first()
+                        if (discount_info != None):
+                            totalcost = (item.price - discount_info.discount_amount) * int(astdata["qty"])
+                        else:
+                            flash('Discount for ' + item.itemname + ' does not exist. Either it is removed, or it never exist.')
+                            totalcost = item.price * int(astdata["qty"])
+                    else:
+                        totalcost = item.price * int(astdata["qty"])
+                    db.session.delete(cartitem)
+                    items.append({"id": item.id, "name": item.itemname, "qty": int(astdata["qty"]), "total": totalcost, "discount_code": astdata["discount_code"]})
+                    grandtotalcost += totalcost
+    db.session.commit()
     return render_template('order/checkout.html', items=items, grandtotalcost=grandtotalcost)
 
 
@@ -64,7 +109,15 @@ def confirm_buy():
                     flash('Item ' + item.itemname + ' quantity ordered exceeds supply of ' + str(item.qty) + '.')
                 else:
                     qty_ordered = int(astdata["qty"])
-                    totalcost = item.price * qty_ordered
+                    if (astdata["discount_code"] != ""):
+                        discount_info = Discount.query.filter_by(item_id=item.id, discount_code=astdata["discount_code"]).first()
+                        if (discount_info != None):
+                            totalcost = (item.price - discount_info.discount_amount) * qty_ordered
+                        else:
+                            flash('Discount for ' + item.itemname + ' does not exist. Either it is removed, or it never exist.')
+                            totalcost = item.price * qty_ordered
+                    else:
+                        totalcost = item.price * qty_ordered
 
                     if(totalcost <= current_user.credits):
                         current_user.credits -= totalcost
@@ -79,7 +132,7 @@ def confirm_buy():
                         db.session.add(orderitem)
                         db.session.commit()
                     else:
-                        flash('Item ' + item.itemname + ' x(' + str(qty_ordered) + ') cannot be bought because your credit is too low.')
+                        flash('Item ' + item.itemname + ' x(' + str(qty_ordered) + ') cannot be bought because you are poor.')
     
     if (len(items_bought) == 0):
         db.session.delete(order)
@@ -101,7 +154,7 @@ def view_item(item_id):
         itemname=item.itemname,
         imageurl=item.imageurl,
         description=item.description,
-        price="{:,.2f}".format(item.price),
+        price=item.price,
         qty=item.qty
     )
 
@@ -122,5 +175,49 @@ def buy_now(item_id):
     if (int(qty) > item.qty):
         flash('Quantity order exceeds the supply.')
         return redirect(url_for('buying.view_item', item_id=item_id))
-    itemdata = {"id": item_id, "qty": qty}
+
+    discount_code = request.form.get('discount-code')
+    discount_info = Discount.query.filter_by(item_id=item.id, discount_code=discount_code).first()
+    if (discount_info == None):
+        itemdata = {"id": item_id, "qty": qty, "discount_code": ""}
+    else:
+        itemdata = {"id": item_id, "qty": qty, "discount_code": discount_code}
+
     return redirect(url_for('buying.checkout', itemlist=[itemdata]))
+
+@buying.route('/order/get-discount', methods=['POST'])
+@login_required
+def get_discount():
+    req = request.get_json()
+    discount_info = Discount.query.filter_by(item_id=req['item_id'], discount_code=req['code']).first()
+    if (discount_info != None):
+        res = make_response(jsonify({"discount_amt": discount_info.discount_amount}), 200)
+    else:
+        res = make_response(jsonify({"discount_amt": None}), 200)
+
+    return res
+
+@buying.route('/profile/cart/')
+def view_cart():
+    items = []
+    cartitems = CartItem.query.filter_by(buyer_id=current_user.id).all()
+    for cartitem in cartitems:  
+        item = Item.query.filter_by(id=cartitem.item_id).first()
+        items.append({"name": item.itemname, "qty" : cartitem.qty_ordered, "total": cartitem.qty_ordered * item.price})
+    
+    return render_template("order/cart.html", items=items)
+
+@buying.route('/add_to_cart/<item_id>', methods=["POST"])
+@login_required
+def add_to_cart(item_id):
+    
+    cartitem = CartItem.query.filter_by(buyer_id=current_user.id, item_id=item_id).first()
+    if cartitem == None:
+        qty = int(request.form.get('qty'))
+        new_cartitem = CartItem(buyer_id=current_user.id, item_id=item_id, qty_ordered=qty)
+        db.session.add(new_cartitem)
+        db.session.commit()
+    else:
+        cartitem.qty_ordered += int(request.form.get('qty'))
+        db.session.commit()
+    return redirect(url_for("buying.view_cart"))

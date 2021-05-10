@@ -13,7 +13,7 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">BIG MONEY</a>
+        <a class="navbar-brand" href="{{ url_for('home.index') }}">BIG MONEY</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -22,7 +22,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="#">Home </a>
+                    <a class="nav-link" href="{{ url_for('home.index') }}">Home </a>
                 </li>
                 {% if current_user.is_authenticated %}
                 <li class="nav-item">
@@ -42,6 +42,9 @@
                     <a class="nav-link" href="{{ url_for('selling.listing') }}">Create Listing</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('buying.view_cart') }}">Cart</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
                 </li>
                 {% endif %}
@@ -52,6 +55,9 @@
 
     {% block content %}
     {% endblock %}
+    
+    <!--Loading JQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <!--Bootstrap Scripts-->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"

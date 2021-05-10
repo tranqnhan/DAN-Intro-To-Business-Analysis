@@ -1,5 +1,19 @@
 {% extends "order/view_item.html" %}
 
 {% block item_action %}
-<button type="submit" class="btn btn-primary btn-block mb-4">Edit Item Info</button>
+{% if discount_code != None %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Discount</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Discount Code</h6>
+            <p class="card-text">{{discount_code}}</p>
+            <h6 class="card-subtitle mb-2 text-muted">Discount Amount</h6>
+            <p class="card-text">${{"{:,.2f}".format(discount_amount)}} off</p>
+        </div>
+    </div>
+{% endif %}
+
+<form action="#" method="POST">
+    <button type="submit" class="btn btn-primary btn-block mb-4">Edit Item Info</button>
+</form>
 {% endblock %}
